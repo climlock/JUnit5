@@ -1,7 +1,9 @@
 package com.mishanya.junit.service;
 
 import com.mishanya.junit.dto.User;
+import com.mishanya.junit.paramresolver.UserServiceParamResolver;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.util.Map;
 import java.util.Optional;
@@ -17,11 +19,18 @@ import static org.junit.jupiter.api.Assertions.*;
 //@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @TestMethodOrder(MethodOrderer.DisplayName.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@ExtendWith({
+        UserServiceParamResolver.class
+})
 public class UserServiceTest {
 
     private static final User IVAN = User.of(1, "Ivan", "123");
     private static final User PETR = User.of(2, "Petr", "111");
     private UserService userService;
+
+    UserServiceTest(TestInfo testInfo) {
+        System.out.println();
+    }
 
 
     @BeforeAll
@@ -31,9 +40,9 @@ public class UserServiceTest {
     }
 
     @BeforeEach
-    void prepare() {
+    void prepare(UserService userService) {
         System.out.println("Before each: " + this );
-        userService = new UserService();
+        this.userService = userService;
     }
 
     @Test

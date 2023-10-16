@@ -3,11 +3,11 @@ package com.mishanya.junit.service;
 import com.mishanya.junit.dto.User;
 import org.junit.jupiter.api.*;
 
-import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 /*
     TestInstance.Lifecycle.PER_CLASS - Создаём только 1 объект класса для всех тестов
@@ -56,7 +56,21 @@ public class UserServiceTest {
         userService.add(PETR);
 
         var users = userService.getAll();
-        assertEquals(2, users.size());
+
+        assertThat(users).hasSize(2);
+//        assertEquals(2, users.size());
+    }
+
+    @Test
+    void usersConvertedToMapById() {
+        userService.add(IVAN, PETR);
+
+        Map<Integer, User> users = userService.getAllConvertedById();
+
+        assertAll(
+                () -> assertThat(users).containsKeys(IVAN.getId(), PETR.getId()),
+                () -> assertThat(users).containsValues(IVAN, PETR)
+        );
     }
 
     @Test
@@ -65,8 +79,30 @@ public class UserServiceTest {
 
         Optional<User> maybeUser = userService.login(IVAN.getUsername(), IVAN.getPassword());
 
-        assertTrue(maybeUser.isPresent());
-        maybeUser.ifPresent(user -> assertEquals(IVAN, user));
+        assertThat(maybeUser).isPresent();
+//        assertTrue(maybeUser.isPresent());
+
+        maybeUser.ifPresent(user -> assertThat(user).isEqualTo(IVAN));
+//        maybeUser.ifPresent(user -> assertEquals(IVAN, user));
+    }
+
+    @Test
+    void throwExceptionIfUserNameOrPasswordIsNull() {
+//        try{
+//            userService.login(null, "222");
+//            Assertions.fail("Login should throws exception on null username");
+//
+//        } catch (IllegalArgumentException e) {
+//            assertTrue(true);
+//        }
+
+//  Более удобный аналог
+//        assertThrows(IllegalArgumentException.class, () ->  userService.login(null, "222"));
+
+        assertAll(
+                () ->assertThrows(IllegalArgumentException.class, () ->  userService.login(null, "222")),
+                () -> assertThrows(IllegalArgumentException.class, () ->  userService.login("222", null))
+        );
     }
 
     @Test

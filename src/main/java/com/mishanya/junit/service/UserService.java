@@ -3,6 +3,11 @@ package com.mishanya.junit.service;
 import com.mishanya.junit.dto.User;
 
 import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import static java.util.function.Function.identity;
+import static java.util.stream.Collectors.toMap;
 
 public class UserService {
 
@@ -12,14 +17,22 @@ public class UserService {
         return users;
     }
 
-    public boolean add(User user) {
-        return users.add(user);
+    public void add(User... users) {
+        this.users.addAll(Arrays.asList(users));
     }
 
     public Optional<User> login(String username, String password) {
+        if (username == null || password == null) {
+            throw new IllegalArgumentException("Username or password is null");
+        }
         return users.stream()
                 .filter(user -> user.getUsername().equals(username))
                 .filter(user -> user.getPassword().equals(password))
                 .findFirst();
+    }
+
+    public Map<Integer, User> getAllConvertedById() {
+        return users.stream()
+                .collect(toMap(User::getId, identity()));
     }
 }

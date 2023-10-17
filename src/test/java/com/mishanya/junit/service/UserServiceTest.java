@@ -1,6 +1,7 @@
 package com.mishanya.junit.service;
 
 import com.mishanya.junit.TestBase;
+import com.mishanya.junit.dao.UserDao;
 import com.mishanya.junit.dto.User;
 import com.mishanya.junit.extension.*;
 import org.junit.Ignore;
@@ -8,6 +9,8 @@ import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.*;
+import org.mockito.Mock;
+import org.mockito.Mockito;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -29,14 +32,15 @@ import static org.junit.jupiter.api.Assertions.*;
 @ExtendWith({
         UserServiceParamResolver.class,
         PostProcessingExtension.class,
-        ConditionalExtension.class,
-        ThrowableExtension.class
+        ConditionalExtension.class
+//        ThrowableExtension.class
 //        GlobalExtension.class  // Наследуем с класса TestBase
 })
 public class UserServiceTest extends TestBase {
 
     private static final User IVAN = User.of(1, "Ivan", "123");
     private static final User PETR = User.of(2, "Petr", "111");
+    private UserDao userDao;
     private UserService userService;
 
     UserServiceTest(TestInfo testInfo) {
@@ -50,10 +54,31 @@ public class UserServiceTest extends TestBase {
 
     }
 
+//    @BeforeEach
+//    void prepare(UserService userService) {
+//        System.out.println("Before each: " + this );
+//        this.userService = userService;
+//    }
+
     @BeforeEach
-    void prepare(UserService userService) {
+    void prepare() {
         System.out.println("Before each: " + this );
-        this.userService = userService;
+        //this.userDao = Mockito.mock(UserDao.class);
+        this.userService = new UserService(new UserDao());
+    }
+
+    @Test
+    @Disabled
+    void shouldDeleteExistedUser() {
+        userService.add(IVAN);
+//        Mockito.doReturn(true).when(userDao).delete(IVAN.getId());
+//        Mockito.doReturn(true).when(userDao).delete(Mockito.any());
+
+//        Mockito.when(userDao.delete(IVAN.getId())).thenReturn(true);
+
+        var delete = userService.delete(IVAN.getId());
+
+        assertThat(delete).isTrue();
     }
 
     @Test

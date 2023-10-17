@@ -4,9 +4,12 @@ import com.mishanya.junit.dto.User;
 import com.mishanya.junit.paramresolver.UserServiceParamResolver;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.*;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -149,5 +152,36 @@ public class UserServiceTest {
                     () -> assertThrows(IllegalArgumentException.class, () ->  userService.login("222", null))
             );
         }
+
+        @ParameterizedTest
+//        @ArgumentsSource()
+//        @NullSource       // {
+//        @EmptySource      //  Only 1 param
+//        @ValueSource      //}
+//        @NullAndEmptySource
+//        @ValueSource(strings = {
+//                "Ivan", "Petr"
+//        })
+        @MethodSource("com.mishanya.junit.service.UserServiceTest#getArgumentsForLoginTest")
+//        @CsvFileSource(resources = "/login-test-data.csv", delimiter = ',', numLinesToSkip = 1)
+//        @CsvSource({
+//                "Ivan,123",
+//                "Petr,111"
+//        })
+        void loginParametrizedTest(String username, String password, Optional<User> user) {
+            userService.add(IVAN, PETR);
+
+            var maybeUser = userService.login(username, password);
+            assertThat(maybeUser).isEqualTo(user);
+        }
+
+    }
+    static Stream<Arguments> getArgumentsForLoginTest() {
+        return Stream.of(
+                Arguments.of("Ivan", "123", Optional.of(IVAN)),
+                Arguments.of("Petr", "111", Optional.of(PETR)),
+                Arguments.of("Petr", "123", Optional.empty()),
+                Arguments.of("Sara", "111", Optional.empty())
+        );
     }
 }

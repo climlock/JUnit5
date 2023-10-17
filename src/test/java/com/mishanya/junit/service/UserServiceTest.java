@@ -1,12 +1,16 @@
 package com.mishanya.junit.service;
 
+import com.mishanya.junit.TestBase;
 import com.mishanya.junit.dto.User;
-import com.mishanya.junit.paramresolver.UserServiceParamResolver;
+import com.mishanya.junit.extension.*;
+import org.junit.Ignore;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.*;
 
+import java.io.IOException;
+import java.time.Duration;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -23,9 +27,13 @@ import static org.junit.jupiter.api.Assertions.*;
 @TestMethodOrder(MethodOrderer.DisplayName.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith({
-        UserServiceParamResolver.class
+        UserServiceParamResolver.class,
+        PostProcessingExtension.class,
+        ConditionalExtension.class,
+        ThrowableExtension.class
+//        GlobalExtension.class  // Наследуем с класса TestBase
 })
-public class UserServiceTest {
+public class UserServiceTest extends TestBase {
 
     private static final User IVAN = User.of(1, "Ivan", "123");
     private static final User PETR = User.of(2, "Petr", "111");
@@ -50,7 +58,12 @@ public class UserServiceTest {
 
     @Test
     @Order(1)
-    void userEmptyIfUserAdded(){
+    void userEmptyIfUserAdded() throws IOException {
+
+//        if (true) {
+//            throw new IOException();
+//        }
+
         System.out.println("Test 1: " + this );
         var users = userService.getAll();
 
@@ -105,6 +118,7 @@ public class UserServiceTest {
     @Tag("login")
     class LoginTest {
         @Test
+        @Disabled("flaky")
         void loginFailIfLoginPasswordInNotCorrect(){
             userService.add(IVAN);
 
@@ -112,7 +126,20 @@ public class UserServiceTest {
 
             assertTrue(maybeUser.isEmpty());
         }
+
         @Test
+        @Disabled
+        void checkLoginFunctionalityPerformance() {
+            System.out.println(Thread.currentThread().getName());
+        assertTimeoutPreemptively(Duration.ofMillis(200L), () -> {
+            Thread.sleep(200L);
+            System.out.println(Thread.currentThread().getName());
+            return userService.login(IVAN.getUsername(), IVAN.getPassword());
+        });
+        }
+
+        @Test
+        @RepeatedTest(value = 5, name = RepeatedTest.LONG_DISPLAY_NAME) // Повторение теста
         void loginFailIfUserDoesNotExist(){
             userService.add(IVAN);
 
@@ -153,7 +180,7 @@ public class UserServiceTest {
             );
         }
 
-        @ParameterizedTest
+        @ParameterizedTest(name = "{arguments} test")
 //        @ArgumentsSource()
 //        @NullSource       // {
 //        @EmptySource      //  Only 1 param

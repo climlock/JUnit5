@@ -1,4 +1,4 @@
-package com.mishanya.junit.paramresolver;
+package com.mishanya.junit.extension;
 
 import com.mishanya.junit.service.UserService;
 import org.junit.jupiter.api.extension.ExtensionContext;

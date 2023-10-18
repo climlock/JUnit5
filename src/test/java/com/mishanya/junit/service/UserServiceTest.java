@@ -9,6 +9,7 @@ import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.*;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 
@@ -63,7 +64,7 @@ public class UserServiceTest extends TestBase {
     @BeforeEach
     void prepare() {
         System.out.println("Before each: " + this );
-        //this.userDao = Mockito.mock(UserDao.class);
+//        this.userDao = Mockito.mock(UserDao.class);
         this.userService = new UserService(new UserDao());
     }
 
@@ -75,6 +76,15 @@ public class UserServiceTest extends TestBase {
 //        Mockito.doReturn(true).when(userDao).delete(Mockito.any());
 
 //        Mockito.when(userDao.delete(IVAN.getId())).thenReturn(true);
+
+//        Mockito.when(userDao.delete(IVAN.getId()))
+//                .thenReturn(true);
+
+        var integerArgumentCaptor = ArgumentCaptor.forClass(Integer.class);
+
+//        Mockito.verify(userDao, Mockito.times(2)).delete(integerArgumentCaptor.capture());
+
+//        assertThat(integerArgumentCaptor.getValue()).isEqualTo(IVAN.getId()); // Перехватывает значение
 
         var delete = userService.delete(IVAN.getId());
 

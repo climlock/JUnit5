@@ -9,9 +9,8 @@ import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.*;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
-import org.mockito.Mockito;
+import org.mockito.*;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -33,7 +32,8 @@ import static org.junit.jupiter.api.Assertions.*;
 @ExtendWith({
         UserServiceParamResolver.class,
         PostProcessingExtension.class,
-        ConditionalExtension.class
+        ConditionalExtension.class,
+        MockitoExtension.class
 //        ThrowableExtension.class
 //        GlobalExtension.class  // Наследуем с класса TestBase
 })
@@ -41,7 +41,12 @@ public class UserServiceTest extends TestBase {
 
     private static final User IVAN = User.of(1, "Ivan", "123");
     private static final User PETR = User.of(2, "Petr", "111");
+    //@Captor
+    private ArgumentCaptor<Integer> argumentCaptor;
+
+    //@Mock
     private UserDao userDao;
+    //@InjectMocks
     private UserService userService;
 
     UserServiceTest(TestInfo testInfo) {
@@ -65,7 +70,16 @@ public class UserServiceTest extends TestBase {
     void prepare() {
         System.out.println("Before each: " + this );
 //        this.userDao = Mockito.mock(UserDao.class);
-        this.userService = new UserService(new UserDao());
+//        this.userDao = Mockito.mock(UserDao.class);
+//        this.userService = new UserService(new UserDao()); // On V1.0.1
+        this.userService = new UserService(new UserDao()); // On V1.0.1
+    }
+
+    @Test
+    void throwExceptionIfDatabaseIsNotAvailable() {
+//        Mockito.doThrow(RuntimeException.class).when(userDao).delete(IVAN.getId());
+
+        assertThrows(RuntimeException.class, () -> userService.delete(IVAN.getId()));
     }
 
     @Test
@@ -80,7 +94,7 @@ public class UserServiceTest extends TestBase {
 //        Mockito.when(userDao.delete(IVAN.getId()))
 //                .thenReturn(true);
 
-        var integerArgumentCaptor = ArgumentCaptor.forClass(Integer.class);
+//        var integerArgumentCaptor = ArgumentCaptor.forClass(Integer.class);
 
 //        Mockito.verify(userDao, Mockito.times(2)).delete(integerArgumentCaptor.capture());
 
